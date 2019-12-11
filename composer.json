@@ -1,4 +1,13 @@
 {
+	"name": "frogopen/elastic",
+    "description": "elastic package.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "frogopen",
+            "email": "frogopen@frogshealth.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Frogopen\\Elastic\\": "src"

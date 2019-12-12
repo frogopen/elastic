@@ -3,8 +3,8 @@
 namespace Frogopen\Elastic;
 
 use Laravel\Scout\Builder;
-use Laravel\Scout\Engines\Engine;
 use Elasticsearch\Client as Elastic;
+use Laravel\Scout\Engines\Engine;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
 
@@ -53,17 +53,11 @@ class ElasticsearchEngine extends Engine
                 'update' => [
                     '_id' => $model->getKey(),
                     '_index' => $this->index,
-                    // '_type' => $model->searchableAs(),
                 ]
             ];
-            $params['body'][] = [
-                'doc' => $model->toSearchableArray(),
-                'doc_as_upsert' => true
-            ];
         });
-
         $this->elastic->bulk($params);
-    }
+	}
 
     /**
      * Remove the given model from the index.
@@ -81,7 +75,6 @@ class ElasticsearchEngine extends Engine
                 'delete' => [
                     '_id' => $model->getKey(),
                     '_index' => $this->index,
-                    // '_type' => $model->searchableAs(),
                 ]
             ];
         });
@@ -117,9 +110,11 @@ class ElasticsearchEngine extends Engine
             'from' => (($page * $perPage) - $perPage),
             'size' => $perPage,
         ]);
-        $result['nbPages'] = $result['hits']['total']/$perPage;
+
+       	$result['nbPages'] = $result['hits']['total']['value'] / $perPage;
+
         return $result;
-    }
+	}
 
     /**
      * Perform the given search on the engine.
@@ -197,35 +192,31 @@ class ElasticsearchEngine extends Engine
      * @param  mixed  $results
      * @return \Illuminate\Support\Collection
      */
-    public function mapIds($results)
-    {
+	public function mapIds($results)
+	{
         return collect($results['hits']['hits'])->pluck('_id')->values();
-    }
+	}
 
     /**
      * Map the given results to instances of the given model.
      *
+     * @param  \Laravel\Scout\Builder  $builder
      * @param  mixed  $results
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return Collection
      */
-    public function map(Builder $builder, $results, $model)
-    {
-        if ($results['hits']['total'] === 0) {
-            return Collection::make();
+	public function map(Builder $builder, $results, $model)
+	{
+		if ($results['hits']['total']['value'] === 0) {
+            return $model->newCollection();
         }
-
-        $keys = collect($results['hits']['hits'])
-                        ->pluck('_id')->values()->all();
-
-        $models = $model->whereIn(
-            $model->getKeyName(), $keys
-        )->get()->keyBy($model->getKeyName());
-
-        return collect($results['hits']['hits'])->map(function ($hit) use ($model, $models) {
-            return isset($models[$hit['_id']]) ? $models[$hit['_id']] : null;
-        })->filter()->values();
-    }
+        $keys = collect($results['hits']['hits'])->pluck('_id')->values()->all();
+        return $model->getScoutModelsByIds(
+                $builder, $keys
+            )->filter(function ($model) use ($keys) {
+                return in_array($model->getScoutKey(), $keys);
+            });
+	}
 
     /**
      * Get the total count from a raw result returned by the engine.
@@ -233,9 +224,22 @@ class ElasticsearchEngine extends Engine
      * @param  mixed  $results
      * @return int
      */
-    public function getTotalCount($results)
+	public function getTotalCount($results)
+	{
+        return $results['hits']['total']['value'];
+	}
+
+    /**
+     * Flush all of the model's records from the engine.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return void
+     */
+    public function flush($model)
     {
-        return $results['hits']['total'];
+        $model->newQuery()
+            ->orderBy($model->getKeyName())
+            ->unsearchable();
     }
 
     /**
@@ -253,11 +257,5 @@ class ElasticsearchEngine extends Engine
         return collect($builder->orders)->map(function($order) {
             return [$order['column'] => $order['direction']];
         })->toArray();
-    }
-    public function flush($model)
-    {
-        $model->newQuery()
-            ->orderBy($model->getKeyName())
-            ->unsearchable();
     }
 }

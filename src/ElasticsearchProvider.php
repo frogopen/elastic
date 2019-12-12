@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace Frogopen\Elastic;
 
 use Laravel\Scout\EngineManager;

@@ -81,7 +81,7 @@ class ElasticsearchEngine extends Engine
                 'delete' => [
                     '_id' => $model->getKey(),
                     '_index' => $this->index,
-                    '_type' => $model->searchableAs(),
+                    // '_type' => $model->searchableAs(),
                 ]
             ];
         });
@@ -239,7 +239,7 @@ class ElasticsearchEngine extends Engine
      */
     public function getTotalCount($results)
     {
-        return $results['hits']['total'];
+        return $results['hits']['total']['value'];
     }
 
     /**

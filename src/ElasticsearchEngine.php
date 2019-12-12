@@ -81,7 +81,7 @@ class ElasticsearchEngine extends Engine
                 'delete' => [
                     '_id' => $model->getKey(),
                     '_index' => $this->index,
-                    '_type' => $model->searchableAs(),
+                    // '_type' => $model->searchableAs(),
                 ]
             ];
         });
@@ -117,9 +117,7 @@ class ElasticsearchEngine extends Engine
             'from' => (($page * $perPage) - $perPage),
             'size' => $perPage,
         ]);
-
         $result['nbPages'] = $result['hits']['total']/$perPage;
-
         return $result;
     }
 
@@ -134,7 +132,6 @@ class ElasticsearchEngine extends Engine
     {
         $params = [
             'index' => $this->index,
-            'type' => $builder->index ?: $builder->model->searchableAs(),
             'body' => [
                 'query' => [
                     'bool' => [
@@ -164,7 +161,6 @@ class ElasticsearchEngine extends Engine
                     $options['numericFilters']);
             }
         }
-
         if ($builder->callback) {
             return call_user_func(
                 $builder->callback,

@@ -219,6 +219,13 @@ class ElasticsearchEngine extends Engine
             return $model->newCollection();
         }
         $keys = collect($results['hits']['hits'])->pluck('_id')->values()->all();
+        // $models = $model->whereIn(
+        //     $model->getKeyName(), $keys
+        // )->get()->keyBy($model->getKeyName());
+        // return collect($results['hits']['hits'])->map(function ($hit) use ($model, $models) {
+        //     $one = $models[$hit['_id']];
+        //     return $one;
+        // });
         return $model->getScoutModelsByIds(
                 $builder, $keys
             )->filter(function ($model) use ($keys) {

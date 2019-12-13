@@ -55,6 +55,10 @@ class ElasticsearchEngine extends Engine
                     '_index' => $this->index,
                 ]
             ];
+            $params['body'][] = [
+                'doc' => $model->toSearchableArray(),
+                'doc_as_upsert' => true
+            ];
         });
         $this->elastic->bulk($params);
 	}

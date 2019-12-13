@@ -221,14 +221,6 @@ class ElasticsearchEngine extends Engine
         // )->get()->keyBy($model->getKeyName());
         // return collect($results['hits']['hits'])->map(function ($hit) use ($model, $models) {
         //     $one = $models[$hit['_id']];
-        //     dd($one);
-        //     /*
-        //      * 这里返回的数据，如果有 highlight，就把对应的  highlight 设置到对象上面
-        //      */
-        //     if (isset($hit['highlight'])) {
-        //         $one->highlights = $hit['highlight'];
-        //     }
-
         //     return $one;
         // });
         return $model->getScoutModelsByIds(

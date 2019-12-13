@@ -151,15 +151,19 @@ class ElasticsearchEngine extends Engine
         if (isset($options['size'])) {
             $params['body']['size'] = $options['size'];
         }
-
+        
         if (isset($options['numericFilters']) && count($options['numericFilters'])) {
             if(isset($options['numericFilters'][0]['query_string'])) {
                 $params['body']['query']['bool']['must'][0]['query_string']['fields'] = $options['numericFilters'][0]['query_string'];
+                if (isset($options['numericFilters'][1]['match_phrase'])) {
+                	$params['body']['query']['bool']['must'][1]['match_phrase'] = $options['numericFilters'][1]['match_phrase'];
+                }
             } else {
                 $params['body']['query']['bool']['must'] = array_merge($params['body']['query']['bool']['must'],
                     $options['numericFilters']);
             }
         }
+        
         if ($builder->callback) {
             return call_user_func(
                 $builder->callback,

@@ -172,8 +172,8 @@ class ElasticsearchEngine extends Engine
 		           }
 	          }
          } else {
-                $params['body']['query']['bool']['must'] = array_merge($params['body']['query']['bool']['must'],
-                    $options['numericFilters']);
+            $params['body']['query']['bool']['must'] = array_merge($params['body']['query']['bool']['must'],
+                $options['numericFilters']);
             }
         }
         if ($builder->callback) {
